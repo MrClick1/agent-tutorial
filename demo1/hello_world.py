@@ -19,15 +19,20 @@ from __future__ import annotations
 
 import json
 import os
+from dotenv import load_dotenv
 
 import requests
 
+load_dotenv()  # 从 .env 文件中加载环境变量
+
 
 # DeepSeek模型API地址： https://api.deepseek.com/chat/completions
-API_URL = "https://api.deepseek.com/chat/completions"
+API_URL = os.getenv("API_URL")
 
 # 选用deepseek-v4-flash模型
-MODEL_NAME = "deepseek-v4-flash"
+MODEL_NAME = os.getenv("MODEL_NAME")
+
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
 
 def build_messages() -> list[dict[str, str]]:

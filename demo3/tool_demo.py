@@ -258,7 +258,11 @@ def run_agent_turn(api_key: str, messages: list[dict[str, Any]]) -> str:
     tools = build_tools()
 
     for _ in range(MAX_TOOL_ROUNDS):
-        assistant_message = call_llm(api_key=api_key, messages=messages, tools=tools)
+        assistant_message = call_llm(
+            api_key=api_key,
+            messages=messages,
+            tools=tools
+        )
         tool_calls = assistant_message.get("tool_calls") or []
 
         if tool_calls:
@@ -287,7 +291,10 @@ def run_agent_turn(api_key: str, messages: list[dict[str, Any]]) -> str:
                     {
                         "role": "tool",
                         "tool_call_id": tool_call["id"],
-                        "content": json.dumps(tool_result, ensure_ascii=False),
+                        "content": json.dumps(
+                            tool_result,
+                            ensure_ascii=False
+                        ),
                     }
                 )
 
