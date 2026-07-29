@@ -108,8 +108,13 @@ def build_state_message(user_goal: str, state: dict[str, Any], step_logs: list[s
     """将当前任务状态整理成一条消息，发给模型决定下一步动作。"""
     step_log_text = "\n".join(f"- {item}" for item in step_logs) if step_logs else "- 暂无"
     tool_result = state.get("tool_result")
+    # 三元表达式 值1 if 条件 else 值2
     tool_result_text = (
-        json.dumps(tool_result, ensure_ascii=False, indent=2)
+        json.dumps(
+            tool_result,
+            ensure_ascii=False,
+            indent=2
+        )
         if tool_result is not None
         else "null"
     )
@@ -178,7 +183,7 @@ def call_planner(
     )
     response.raise_for_status()
 
-    result = response.json()
+    result: dict = response.json() # 将json字符串解析为Python字典
     raw_content = result["choices"][0]["message"]["content"]
     return parse_json_response(raw_content)
 
@@ -187,6 +192,7 @@ def parse_json_response(raw_content: str) -> dict[str, Any]:
     """把模型返回的 JSON 文本解析成 Python 字典。"""
     text = raw_content.strip()
 
+    # 如果模型返回的 JSON 被包裹在 ``` 代码块里，去掉这些标记。
     if text.startswith("```"):
         lines = text.splitlines()
         if len(lines) >= 3:

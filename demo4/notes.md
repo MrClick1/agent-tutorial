@@ -27,4 +27,39 @@
 
 ---
 
+## 2. `response.json()`、`json.dumps()`、`json.loads()` 之间的区别
+
+### 功能对比
+
+| 方法/函数 | 作用 | 方向 | 输入 | 输出 |
+|-----------|------|------|------|------|
+| `response.json()` | 把 HTTP 响应中的 JSON 文本解析为 Python 对象 | 字符串 → Python 对象 | `requests.Response` 响应体 | Python dict/list 等 |
+| `json.loads(s)` | 把 JSON 字符串解析为 Python 对象 | 字符串 → Python 对象 | JSON 字符串 | Python dict/list 等 |
+| `json.dumps(obj)` | 把 Python 对象转为 JSON 字符串 | Python 对象 → 字符串 | Python dict/list 等 | JSON 字符串 |
+
+### 关系说明
+
+- `response.json()` 内部其实调用了 `json.loads(response.text)`。
+- `json.loads()` 和 `json.dumps()` 互为逆操作：一个把 JSON 字符串变成 Python 对象，一个把 Python 对象变成 JSON 字符串。
+
+### 示例
+
+```python
+import json
+import requests
+
+response = requests.post(url, json=payload)
+
+# 解析响应 JSON → Python 字典
+data = response.json()
+
+# Python 字典 → JSON 字符串
+text = json.dumps(data, ensure_ascii=False, indent=2)
+
+# JSON 字符串 → Python 字典
+obj = json.loads(text)
+```
+
+---
+
 *记录时间：2026-07-28*
