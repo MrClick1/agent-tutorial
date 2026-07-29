@@ -5,6 +5,9 @@ from typing import Any
 
 import requests
 import json
+from dotenv import load_dotenv
+
+load_dotenv()  # 从 .env 文件加载环境变量，方便本地开发调试
 
 DEFAULT_API_URL = "https://api.deepseek.com/chat/completions"
 DEFAULT_MODEL_NAME = "deepseek-v4-flash"

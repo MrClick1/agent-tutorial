@@ -5,7 +5,11 @@ from typing import Any
 
 import requests
 
+from dotenv import load_dotenv
+
 from config import API_URL, MAX_COMPLETION_TOKENS, MODEL_NAME
+
+load_dotenv()  # 从 .env 文件加载环境变量
 
 
 def create_system_message() -> dict[str, str]:
