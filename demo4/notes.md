@@ -34,7 +34,7 @@
 | 方法/函数 | 作用 | 方向 | 输入 | 输出 |
 |-----------|------|------|------|------|
 | `response.json()` | 把 HTTP 响应中的 JSON 文本解析为 Python 对象 | 字符串 → Python 对象 | `requests.Response` 响应体 | Python dict/list 等 |
-| `json.loads(s)` | 把 JSON 字符串解析为 Python 对象 | 字符串 → Python 对象 | JSON 字符串 | Python dict/list 等 |
+| `json.loads(s)` | 把 JSON 字符串解析为 Python 对象 | 字符串 → Python 对象 | JSON JSON 字符串 | Python dict/list 等 |
 | `json.dumps(obj)` | 把 Python 对象转为 JSON 字符串 | Python 对象 → 字符串 | Python dict/list 等 | JSON 字符串 |
 
 ### 关系说明
@@ -59,6 +59,53 @@ text = json.dumps(data, ensure_ascii=False, indent=2)
 # JSON 字符串 → Python 字典
 obj = json.loads(text)
 ```
+
+---
+
+## 3. 为什么 `raw_content` 可能是任意内容，却要解析出 `action` 字段？
+
+**答：** 因为 prompt 已经明确要求模型只返回一个 JSON 对象，其中包含 `action` 字段。程序期望模型遵守这个约定。
+
+在 [`build_state_message()`](demo4/planning_demo.py#L107-L147) 中，prompt 明确写了：
+
+```text
+请只返回一个 JSON 对象，字段如下：
+{
+  "step_summary": "...",
+  "action": "decide_path | draft_content | create_file | finish",
+  ...
+}
+```
+
+后续代码要用 `action` 决定下一步：
+
+```python
+if action == "decide_path": ...
+if action == "draft_content": ...
+if action == "create_file": ...
+if action == "finish": ...
+```
+
+所以 `parse_json_response()` 做了三层校验，把不确定的模型输出变成可安全使用的数据结构：
+
+1. 去掉 markdown 代码块包装
+2. `json.loads()` 解析成 Python 对象
+3. `isinstance(data, dict)` 确保是字典，否则 `data.get("action")` 会报错
+
+---
+
+## 4. `if not isinstance(data, dict): raise ValueError(...)` 的作用
+
+**答：** 检查模型返回的 JSON 解析后是否是一个 Python 字典（对象），如果不是就抛出异常。
+
+`json.loads()` 可能解析出的类型：
+
+- 字典 `{"action": "finish"}` ✅ 期望
+- 列表 `["finish"]` ❌
+- 字符串 `"finish"` ❌
+- 数字、布尔值等 ❌
+
+这个检查保证后续 `data.get("action")` 能安全执行。
 
 ---
 

@@ -2,8 +2,11 @@ import json
 import os
 from pathlib import Path
 from typing import Any
+from dotenv import load_dotenv
 
 import requests
+
+load_dotenv()  # 从 .env 文件加载环境变量
 
 
 API_URL = "https://api.deepseek.com/chat/completions"
@@ -199,7 +202,7 @@ def parse_json_response(raw_content: str) -> dict[str, Any]:
             text = "\n".join(lines[1:-1]).strip()
 
     try:
-        data = json.loads(text)
+        data = json.loads(text) # 将JSON字符串解析为Python对象
     except json.JSONDecodeError as exc:
         raise ValueError(f"模型没有返回合法 JSON：{exc}\n原始内容：{raw_content}") from exc
 
